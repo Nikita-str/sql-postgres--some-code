@@ -1,0 +1,8 @@
+country_table_filling.sql
+create_tables_[x].sql
+triggers_[y].sql
+insert_[z].sql
+
+nothing | del_upd_01.sql &| select_01.sql
+
+NOTE: del_upd_01.sql is obsolete, now it can be written with less code thanks to triggers. but it yet execute.
