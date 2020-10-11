@@ -114,12 +114,14 @@ DECLARE
 	var_rating_delta INTEGER;
 	var_player_id  INTEGER;
 BEGIN
-	var_rating_delta = NEW.rating_change;
-	IF (var_rating_delta IS NULL) OR (var_rating_delta = 0) THEN BEGIN RETURN NEW; END; END IF; --go next only if this is winner
+	var_rating_delta = COALESCE(NEW.rating_change, 0);
+	IF (COALESCE(OLD.rating_change, 0) = 0) AND (var_rating_delta = 0) 
+		THEN BEGIN RETURN NEW; END;
+	END IF; 
 	
 	var_player_id = NEW.player_id;
 	UPDATE chess_player -- set winner in tournament
-	SET rating = rating + var_rating_delta
+	SET rating = rating + var_rating_delta - COALESCE(OLD.rating_change, 0)
 	WHERE player_id = var_player_id;
 	
 	RETURN NEW;
@@ -137,4 +139,10 @@ EXECUTE FUNCTION change_player_rating();
 SELECT rating FROM chess_player WHERE player_id = 25; -- x
 UPDATE player_participation SET rating_change = 12 WHERE player_id = 25 AND tournament_id = 7;
 SELECT rating FROM chess_player WHERE player_id = 25; -- x+12
+UPDATE player_participation SET rating_change = 10 WHERE player_id = 25 AND tournament_id = 7;
+SELECT rating FROM chess_player WHERE player_id = 25; -- x+10
+UPDATE player_participation SET rating_change = NULL WHERE player_id = 25 AND tournament_id = 7;
+SELECT rating FROM chess_player WHERE player_id = 25; -- x
+UPDATE player_participation SET rating_change = 5 WHERE player_id = 25 AND tournament_id = 7;
+SELECT rating FROM chess_player WHERE player_id = 25; -- x+5
 */
